@@ -4,6 +4,7 @@ export default defineConfig({
   testDir: './tests',
   timeout: 600000,
   workers: 50,
+  globalSetup: require.resolve('./globalSetup'),
   use: {
     browserName: 'chromium',
     headless: true,

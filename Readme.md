@@ -12,7 +12,7 @@ Playwright Test Suite for Netlify Website
 
     4) Generates a categorized Markdown report
 
-• Setup Instructions
+• Setup Instruction
 
     1) Clone the repository
 
@@ -30,14 +30,13 @@ Playwright Test Suite for Netlify Website
 • Test Execution Instructions
 
 
-    Step-by-step Run Order
+-- Step-by-step Run Order
 
     • Test Case 1: Lead Capture Form ValidationThis test validates the email subscription form on the Netlify homepage.
-
+            
             npx playwright test tests/leadForm.test.ts
 
-    • Test Case 2.1: Generate URL List from SitemapThis script fetches URLs from https://www.netlify.com/sitemap.xml and stores them in 
-      urls.json.
+    • Test Case 2.1: Verifies that "sitemap.xml" exist, Also generate URL List from Sitemap.This script fetches URLs from https://www.netlify.   com/sitemap.xml and stores them in the file "urls.json".
 
             npx playwright test tests/generateUrls.test.ts
 
@@ -52,6 +51,11 @@ Playwright Test Suite for Netlify Website
         • Categorizes failures into an auto-generated sitemap-crawl-report.md
 
             npx playwright test tests/siteMapVerification.test.ts
+
+-- Suite execution
+    For running the test in the correct order and with a single command, I created a test suite. To run the test suite 
+    
+            npm run test:suite
 
 
 • Test Cases Summary
@@ -90,14 +94,15 @@ Playwright Test Suite for Netlify Website
 
     I used a modular structure with:
 
-        • leadForm.test.ts --> for UI form validation
+        • leadFormValidation.test.ts --> for UI form validation
         • generateUrls.test.ts --> for sitemap processing
         • siteMapVerification.test.ts --> for SEO & link validation
+        • reportToSiteMap.ts -- > This utility logs test results from Playwright tests into a structured markdown file "sitemap-crawl-report.md".
         • utils/siteMap.ts --> for sitemap parsing
         • pages/HomePage.ts --> as Page Object Model abstraction
 
-    A Markdown report is dynamically updated during test execution with categorized results (broken links, noindex, timeout, internal 404s, etc.).  
+    A Markdown report is dynamically updated during test execution with categorized results (broken links, noindex, internal 404s, etc.).  
 
 • Sample Report Output
 
-        See sitemap-crawl-report.md after test execution.
+        See "sitemap-crawl-report.md" after test execution.

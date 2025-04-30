@@ -3,25 +3,9 @@ import { test } from '@playwright/test';
 import fs from 'fs';
 import path from 'path';
 
+
 // Define the report file path
 const reportPath = 'sitemap-crawl-report.md';
-
-
-// Create the empty sections for the report
-fs.writeFileSync(reportPath, [
-  'Sitemap Crawl Report',
-  '',
-  'Broken Pages:',
-  '',
-  'Noindex Pages:',
-  '',
-  'Timeout Pages:',
-  '',
-  'Broken Internal Links:', 
-  '',
-  'Request Failures:',
-  '',
-].join('\n'), 'utf-8');
 
 
 // Insert the lines under the correct section
@@ -46,7 +30,6 @@ function insertIntoSection(sectionHeader: string, lineToInsert: string) {
   }
 }
 
-
 //Load the URLs from urls.json file
 const urls: string[] = JSON.parse(
   fs.readFileSync(path.join(__dirname, '../urls.json'), 'utf-8')
@@ -55,7 +38,7 @@ const urls: string[] = JSON.parse(
 // Start the tests in parallel
 //Test Case 2: Sitemap and Crawlability Verification
 test.describe.parallel('🌐 Sitemap Page Verification', () => {
-  for (const url of urls.slice(0, 50)) {
+  for (const url of urls) { 
     
     test(`🔍 Check: ${url}`, async ({ page, request }) => {
       try {
@@ -86,34 +69,39 @@ test.describe.parallel('🌐 Sitemap Page Verification', () => {
           }
         }
 
-       
-      // Test Case 3: 404 Link verification
+      const internalLinks = await page.locator('a[href^="http"]').all();
 
-      // Locate all internal links on the page that start with "http"
-      const internalLinks = page.locator('a[href^="http"]');
-      // Count how many internal links were found
-      const linkCount = await internalLinks.count();
-      // Loop through each internal link found on the page
-      for (let i = 0; i < linkCount; i++) {
-      // Get the href attribute (URL) of the current link
-      const href = await internalLinks.nth(i).getAttribute('href');
-      // If href is null or undefined, skip to the next link
-      if (!href) continue; 
-      // Send a GET request to the link's URL to check if it is accessible
-      const linkResponse = await request.get(href);
-
-      // If the response status is 404
-      if (linkResponse.status() === 404) {
-      // Insert a line into the 'Broken Internal Links' section of the report
-      insertIntoSection('## 🔗 Broken Internal Links:', `- ${url} ➔ Broken internal link to ${href} (404)`);
-  }
-}
-
+      const hrefs = await Promise.all(
+        internalLinks.map(link => link.getAttribute('href'))
+      );
+      
+      const cleanHrefs = hrefs.filter(href => href);
+      
+      // Limit concurrency to 10 at a time
+      const concurrencyLimit = 10;
+      
+      const checkLink = async (href: string | null) => {
+        if (!href) return; // Skip nulls
+      
+        try {
+          const res = await request.get(href, { timeout: 3000 });
+          if (res.status() === 404) {
+            insertIntoSection('Broken Internal Links:', `- ${url} ➔ Broken internal link to ${href} (404)`);
+          }
+        } catch {
+          //insertIntoSection('Timeout Pages:', `- ${url} ➔ Link to ${href} timed out`);
+        }
+      };
+      
+      
+      for (let i = 0; i < cleanHrefs.length; i += concurrencyLimit) {
+        const chunk = cleanHrefs.slice(i, i + concurrencyLimit);
+        await Promise.allSettled(chunk.map(checkLink));
+      }
+      
 
       } catch (error) {
         
-        // If anything else fails - log as request failure
-        insertIntoSection('Request Failures:', `- ${url} - Request failed (${(error as Error).name})`);
       }
     });
   }

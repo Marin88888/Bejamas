@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "test:suite": "npx playwright test tests/leadForm.test.ts && npx playwright test tests/generateUrls.test.ts && npx playwright test tests/siteMapVerification.test.ts"
+    "test:suite": "npx playwright test tests/leadFormValidation.test.ts && npx playwright test tests/generateUrls.test.ts && npx playwright test tests/siteMapVerification.test.ts"
   },
   "keywords": [],
   "author": "",
