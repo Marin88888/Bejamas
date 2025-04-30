@@ -16,7 +16,7 @@ Playwright Test Suite for Netlify Website
 
     1) Clone the repository
 
-        git clone https://github.com/your-username/netlify-playwright-tests.git
+        git clone https://github.com/Marin88888/Bejamas.git
         cd netlify-playwright-tests
 
     2)Install dependencies
@@ -29,15 +29,30 @@ Playwright Test Suite for Netlify Website
 
 • Test Execution Instructions
 
-    1) Generate URLs from sitemap
 
-        This test fetches all URLs from sitemap.xml and saves them to urls.json.
+    Step-by-step Run Order
+
+    • Test Case 1: Lead Capture Form ValidationThis test validates the email subscription form on the Netlify homepage.
+
+            npx playwright test tests/leadForm.test.ts
+
+    • Test Case 2.1: Generate URL List from SitemapThis script fetches URLs from https://www.netlify.com/sitemap.xml and stores them in 
+      urls.json.
 
             npx playwright test tests/generateUrls.test.ts
 
-    2)  Run the full test suite
+    • Test Case 2.2 + 3: Sitemap Verification & 404 Link CheckThis test:
 
-            npx playwright test
+        • Verifies all sitemap URLs respond with 200
+
+        • Checks for robots meta tags containing noindex
+
+        • Detects broken internal links returning 404
+
+        • Categorizes failures into an auto-generated sitemap-crawl-report.md
+
+            npx playwright test tests/siteMapVerification.test.ts
+
 
 • Test Cases Summary
 
